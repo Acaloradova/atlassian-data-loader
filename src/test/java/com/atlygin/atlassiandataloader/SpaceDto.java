@@ -1,7 +1,12 @@
 package com.atlygin.atlassiandataloader;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 import static io.qala.datagen.RandomShortApi.alphanumeric;
 
+@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE)
 class SpaceDto {
     String key, name;
     Description description;
@@ -13,7 +18,7 @@ class SpaceDto {
         result.description = Description.random();
         return result;
     }
-
+    @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE)
     static class Description {
         Plain plain;
         static Description random() {
@@ -22,13 +27,5 @@ class SpaceDto {
             return description;
         }
     }
-    static class Plain {
-        String value, representation = "plain";
 
-        static Plain random() {
-            Plain plain = new Plain();
-            plain.value = alphanumeric(10, 100);
-            return plain;
-        }
-    }
 }
