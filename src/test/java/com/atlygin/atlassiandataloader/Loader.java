@@ -52,9 +52,11 @@ public class Loader {
             SpaceDto space = createSpace();
             System.out.println("Creating space " + space.name);
             PageDto lastCreatedPage = null;
-            for(int pageIdx = 0; pageIdx < PAGES_PER_LEVEL; pageIdx++) {
+            for(int levelIdx = 0; levelIdx < HIERARCHY_DEPTH; levelIdx++) {
+                System.out.println("Creating level #" + levelIdx);
                 Ancestor ancestor = lastCreatedPage == null ? null : new Ancestor(lastCreatedPage.id);
-                for(int levelIdx = 0; levelIdx < HIERARCHY_DEPTH; levelIdx++) {
+                for(int pageIdx = 0; pageIdx < PAGES_PER_LEVEL; pageIdx++) {
+                    System.out.println("Creating page #" + pageIdx);
                     lastCreatedPage = createPage(space, ancestor);
                     for(int attachIdx = 0; attachIdx < ATTACHMENTS_PER_PAGE; attachIdx++)
                         createAttachment(lastCreatedPage);
