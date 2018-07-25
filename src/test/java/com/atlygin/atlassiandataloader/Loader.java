@@ -63,7 +63,7 @@ public class Loader {
                         System.out.println("Creating level #" + levelIdx);
                         Ancestor ancestor = lastCreatedPage == null ? null : new Ancestor(lastCreatedPage.id);
                         for(int pageIdx = 0; pageIdx < PAGES_PER_LEVEL; pageIdx++) {
-                            System.out.println("Creating page #" + pageIdx + " in space #" + spaceIndex);
+                            System.out.println("Creating page #" + pageIdx + " in level #" + levelIdx + " of space #" + spaceIndex);
                             lastCreatedPage = createPage(space, ancestor);
                             for(int attachIdx = 0; attachIdx < ATTACHMENTS_PER_PAGE; attachIdx++)
                                 createAttachment(lastCreatedPage);
