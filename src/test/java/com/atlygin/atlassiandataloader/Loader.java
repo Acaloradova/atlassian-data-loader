@@ -11,6 +11,9 @@ import org.junit.Test;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static io.qala.datagen.RandomShortApi.alphanumeric;
 import static io.qala.datagen.RandomShortApi.english;
@@ -46,25 +49,33 @@ public class Loader {
                 .then().assertThat().statusCode(200);
     }
 
-    @Test public void createSpacesAndPages() {
+    @Test public void createSpacesAndPages() throws InterruptedException {
+        ExecutorService pool = Executors.newFixedThreadPool(5);
         long started = System.currentTimeMillis();
         for(int spaceIdx = 0; spaceIdx < SPACES; spaceIdx++) {
-            SpaceDto space = createSpace();
-            System.out.println("Creating space " + space.name);
-            PageDto lastCreatedPage = null;
-            for(int levelIdx = 0; levelIdx < HIERARCHY_DEPTH; levelIdx++) {
-                System.out.println("Creating level #" + levelIdx);
-                Ancestor ancestor = lastCreatedPage == null ? null : new Ancestor(lastCreatedPage.id);
-                for(int pageIdx = 0; pageIdx < PAGES_PER_LEVEL; pageIdx++) {
-                    System.out.println("Creating page #" + pageIdx);
-                    lastCreatedPage = createPage(space, ancestor);
-                    for(int attachIdx = 0; attachIdx < ATTACHMENTS_PER_PAGE; attachIdx++)
-                        createAttachment(lastCreatedPage);
-                    for(int commentIdx = 0; commentIdx < COMMENTS_PER_PAGE; commentIdx++)
-                        createComment(lastCreatedPage);
+            final int spaceIndex = spaceIdx;
+            pool.submit(new Runnable() {
+                public void run() {
+                    SpaceDto space = createSpace();
+                    System.out.println("Creating space " + space.name);
+                    PageDto lastCreatedPage = null;
+                    for(int levelIdx = 0; levelIdx < HIERARCHY_DEPTH; levelIdx++) {
+                        System.out.println("Creating level #" + levelIdx);
+                        Ancestor ancestor = lastCreatedPage == null ? null : new Ancestor(lastCreatedPage.id);
+                        for(int pageIdx = 0; pageIdx < PAGES_PER_LEVEL; pageIdx++) {
+                            System.out.println("Creating page #" + pageIdx + " in space #" + spaceIndex);
+                            lastCreatedPage = createPage(space, ancestor);
+                            for(int attachIdx = 0; attachIdx < ATTACHMENTS_PER_PAGE; attachIdx++)
+                                createAttachment(lastCreatedPage);
+                            for(int commentIdx = 0; commentIdx < COMMENTS_PER_PAGE; commentIdx++)
+                                createComment(lastCreatedPage);
+                        }
+                    }
                 }
-            }
+
+            });
         }
+        pool.awaitTermination(2, TimeUnit.DAYS);
         System.out.println("Took: " + (System.currentTimeMillis() - started) / 1000 / 60 + " min");
     }
 
